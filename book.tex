@@ -1,0 +1,64 @@
+\documentclass[14pt]{extarticle}
+\usepackage{extsizes}
+\usepackage{geometry}
+\geometry{margin=0.5in}
+
+%% for images
+\usepackage{graphicx}
+\graphicspath{ {images/} }
+
+%% language support
+\usepackage[T1,T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+\usepackage{amsmath}
+\usepackage{tikz}
+
+%% hyperrefs
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=cyan
+}
+
+\title{Operating systems and their parts}
+\author{Qunix}
+\date{01.01.1970}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\part{Intro}
+Operating systems are like fractals. The deeper you go, the more you 
+are forced to know. Anyway, there's nothing more pleasant than reaching 
+the real end and realizing you are at the very bottom of the unimaginable a(by)ss.........
+
+\part{A Little OS}
+
+\part{The Parts}
+\section{Filesystems}
+This history is prosaic and too applicative. FS is not OS, and therefore
+there is a simple mechanism of adding new FS in Linux kernel. 
+Read code, write code, execute code. No "AAAAAAAAAARGH MY HARDDISK HAS 
+BEEN UNEXPECTEDLY REFORMATTED NOOOOO". Don't write OS, write FS. 
+\\\\
+How to write FS? We interpret it as "how to register new fs in linux kernel
+and not to cry (as possible)". There are two chairs, and we use dynamic 
+linking because most likely your laptop is a trash already and we don't 
+want to clutter it up any further. So, the first part of question is 
+"how to write a kernel module".   
+\\
+To write a kernel module, we just need a simple Makefile, which 
+specifies our sources and then transfer control to a some of kernel 
+Makefiles written exactly for making modules. Google this step yourself.
+\\\\
+As for the sources, there are also some rules of writing FS. You need 
+to specify a chain of functions doing at least mounting and unmounting.
+Then, you can check kernel log and see if it works. The working (for me)
+example is in \href{https://github.com/x6x4/custom_fs}{my repo}.
+\end{document}
