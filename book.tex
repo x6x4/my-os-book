@@ -22,8 +22,11 @@
     citecolor=black,
     filecolor=black,
     linkcolor=black,
-    urlcolor=cyan
+    urlcolor=magenta
 }
+
+%% some exotic
+\setcounter{section}{-1}
 
 \title{Operating systems and their parts}
 \author{Qunix}
@@ -36,9 +39,95 @@
 \part{Intro}
 Operating systems are like fractals. The deeper you go, the more you 
 are forced to know. Anyway, there's nothing more pleasant than reaching 
-the real end and realizing you are at the very bottom of the unimaginable a(by)ss.........
+the real end and realizing you are at the very bottom 
+of the unimaginable abyss.........
+\\\\
+However, we follow KISS! It means no Windows, no exotic, no challenges.
+Just make things work and go ahead. 
 
 \part{A Little OS}
+
+When we try to do something, we always hope that it'll be simple to achieve
+the result.
+But for some awful reasons authors of most guides make monstrous algorithms
+that are ultimately completely unusable.\\
+To escape these problems, you should remember one thing - 
+\texttt{OS is a program}. And the program needs the proper 
+environment to be executed in. No environment - no execution!
+\\
+Please, do not touch your real computer for now. Our first task is to 
+simulate the execution, not to play with disks. It has too much theory
+behind. For now. We will return back to this ASAP.
+\\
+Starting with sandbox - guested isolated RE - we choose QEMU. 
+A bit tricky to play with it freely, but fits excellent to copy $\&$ paste 
+or change certain parameters. 
+
+\section{Adventure begins}
+The command \texttt{man qemu} tells us: 
+\begin{verbatim}
+    qemu-system-x86_64 [options] [disk_image]
+\end{verbatim}
+OK, we need disk image to be started. And here comes the great and 
+terrible truth - the main feature of OS, distinguishing them from 
+other programs, is their ability to be booted. BOOOOOOOtable image. 
+It is achieved relatively easily - your program executable should 
+end up with magic number 0x55aa and have 512 bytes in size.\\
+At first, we make OS, which only hangs. Then, change register values 
+and observe it with debugger. After this we discover the interrupts.
+\\
+As you could notice, we work with x86-64 architecture. It means reversed
+byte order so don't be surprised.
+\newpage
+\section{Assembly}
+We use nasm. \texttt{\$\$} - the beginning of our code, \texttt{\$} - the 
+address of current line. 
+\begin{verbatim}
+    jmp $                          ;  infinite loop
+    times 512 - 2 - ($-$$) db 0    ;  zeroing everything between
+    dw 0xaa55                      ;  w - word = 2 bytes 
+\end{verbatim}
+Let's build it up to executable.\\
+\texttt{nasm <input file> [-f <format>] [-o <output file>]}\\
+You can write just \texttt{nasm myOS.asm} and you'll here. 
+\texttt{hexdump myOS} says:
+\begin{verbatim}
+    0000000 feeb 0000 0000 0000 0000 0000 0000 0000
+    0000010 0000 0000 0000 0000 0000 0000 0000 0000
+    *
+    00001f0 0000 0000 0000 0000 0000 0000 0000 aa55
+    0000200
+\end{verbatim}
+Little-endian, as always, makes shit. You can see magic number, 
+the total executable size (0x200 $= 2*16^2 = 512$), and also EB FE. 
+According to \href{http://sparksandflames.com/files/x86InstructionChart.html}
+{Intel x86 opcodes}, EB is a short (within a byte) jump and 
+its argument, FE, is -2. 
+Jump two bytes back is to start over. Infinite loop as it is. 
+\\\\
+The next step is to clutter up the registers. Just put up cluttering 
+instruction (e.g. \texttt{mov eax, 555}) BEFORE loop, and you're done. 
+\texttt{info registers} on qemu monitor should give you what you want to see. 
+Another option is to use GDB. Add option \texttt{-s} to QEMU:\\
+\texttt{-s Shorthand for -gdb tcp::1234, i.e. open a gdbserver 
+on TCP port 1234}\\
+And when QEMU starts, start gdb and type\\
+\texttt{target remote localhost:1234}\\
+Now debugger and your OS are connected, so you can, for example, 
+clutter up registers in runtime. Use \texttt{set \$eax=0xdead} and
+\texttt{print /x \$eax}. 
+
+\section{Acquire hardware}
+Guess you've played enough with registers. Doesn't make any sense, really?
+Well, to do and see real things we need to know some more. 
+BIOS interrupts allow us to do some basic things, but they are too 
+non-visual while relatively hard to tell about. Skipping this step, we come 
+to modifying peripherals - maybe video memory device. Don't you like 
+colourful text? 
+
+\section{Getting an upgrade}
+
+
 
 \part{The Parts}
 \section{Filesystems}
